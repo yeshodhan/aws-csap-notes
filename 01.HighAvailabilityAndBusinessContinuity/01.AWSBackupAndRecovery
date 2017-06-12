@@ -1,0 +1,113 @@
+Domain 1 > Chapter 1
+AWS Backup and Recovery
+AWS Architect Professional
+
+Whitepaper: http://d36cz9buwru1tt.cloudfront.net/AWS_Disaster_Recovery.pdf
+
+* Disaster Recovery
+    * DR is about preparing for and recovering from a disaster.
+* Recovery Time Object (RTO)
+    * Amount of time that it takes for your business to recover from an outage.
+    * Can include the time for trying to fix the problem without a recovery, the recovery itself,  and the communication to users.
+* Recovery Point Objective (RPO)
+    * The maximum period of time in which data might be lost from an IT service due to a major incident.
+    * How much data can your organization afford to lose? An hour? A day? None at all?
+* Traditional Approaches
+    * N+1 approach and has different levels of off-site duplication
+* Why AWS for DR?
+    * Minimum hardware.
+    * Opex model (Pay as you use)
+    * Automate disaster recovery deployment
+* Services
+    * Regions
+    * Storage
+        * S3 - 99.999999999% durability (11 9s)
+        * Glacier
+        * EBS
+        * Direct Connect
+        * AWS Storage Gateway
+            * Gateway-cached volumes - store primary data and cache most recently used data locally
+            * Gateway-stored volumes - store entire dataset on site and async replicate data to S3
+            * Gateway-virtual tape library - Store your virtual tapes in S3 or Glacier
+    * Compute
+        * EC2
+        * EC2 VM Import Connector
+    * Network
+        * Route53
+        * ELB
+        * VPC
+        * Amazon Direct Connect
+    * Databases
+        * RDS
+        * DynamoDB
+        * RedShift
+    * Orchestration
+        * CloudFormation
+        * ElasticBeanstalk
+        * OpsWork
+* DR Scenarios
+    * Backup & Restore (Longer RTO and Longer RPO)
+        * S3 + Glacier
+        * AWS Direct Connect
+        * AWS Import/Export
+        * Storage Gateway
+        * Steps:
+            * Select appropriate tool
+            * appropriate retention policy
+    * Pilot Light
+        * Minimal version of an environment is always running in the cloud.
+        * When time comes for recovery, you can rapidly provision a full-scale production environment around the critical one.
+        * RDS + EC2 (AMIs)
+        * Preallocated Elastic IP, Elastic Network Interfaces, Mac Addresses, ELB, Update DNS
+        * Data Mirroring replication from corporate DB to AWS
+        * Steps (setup):
+            * Setup EC2 instances
+            * Custom software packages are available
+            * Prepare AMIs
+            * Regularly run these servers, test and software updates.
+            * Consider automating the provisioning of AWS resources. (eg. cloud formation, trigger lambda to run these templates)
+        * Steps (Recovery)
+            * Start EC2 instances
+            * Resize database instances
+            * Additonal database/data store instances, Multi ZA.
+            * Change DNS
+            * Install and configure any non-AMI based systems, ideally in an automated way.
+    * Warm Standby
+        * A scaled-down of a fully functional environment is always running the cloud.
+        * extends the pilot light elements and preparation, and future reduces the recovery time.
+        * Horizontal scaling is preferred over vertical scaling.
+        * Steps( setup)
+            * Setup EC@ instance and replicate
+            * create and maintain AMI
+            * run application using minimal footprint (t2 micro etc)
+            * Patch and update software and configuration in line with your live environment
+        * Steps (recovery)
+            * Increase the size of EC2 fleet.
+            * Start apps on larger EC instance types
+            * manually change the DNS records
+            * consider auto-scaling
+            * add resilience or scale up database.
+    * Multi Site (RTO ~= RPO)
+        * Active-Active configuration on premise and on AWS
+        * May run 50-50 traffic.
+        * In case of DR - adjust DNS weighting and send all traffic to AWS servers.
+        * Steps (Setup)
+            * set AWS and duplicate production
+            * setup DNS weighting
+        * Steps (recovery)
+            * Manually DNS adjust
+            * application logic to switch DB queries
+* Summary
+￼
+* Exam Tips
+    * RTOs and RPOs and asked which AWS services your should choose. All choices may be correct, just some are more correct than others.
+* Key Techs
+    * S3 (11 9s)
+    * Glacier (Atleast 3 hours)
+    * EBS - Create point-in-time snapshots of data volumes
+    * DynamoDB - Offers cross region replication
+    * RDS - Ability to run read replica in another region
+    * Redshift - Snapshot warehouse to S3 within same region or copied to another region.
+
+
+
